@@ -14,9 +14,12 @@
 
 #define GREEN_LED BIT6
 
-
+// Paddle Rectangle
 AbRect rect10 = {abRectGetBounds, abRectCheck, {2,10}}; /**< 2x10 rectangle */
 
+// Scores fo the players
+u_char p1Score = '0';
+u_char p2Score = '0';
 
 AbRectOutline fieldOutline = {	/* playing field */
   abRectOutlineGetBounds, abRectOutlineCheck,   
@@ -66,8 +69,8 @@ typedef struct MovLayer_s {
 } MovLayer;
 
 /* initial value of {0,0} will be overwritten */
-MovLayer ml2 = { &layer2, {0,2}, 0 };
-MovLayer ml1 = { &layer1, {0,2}, 0 }; 
+MovLayer ml2 = { &layer2, {0,3}, 0 };
+MovLayer ml1 = { &layer1, {0,3}, 0 };
 MovLayer ml0 = { &layer0, {2,2}, 0 }; 
 void movLayerDraw(MovLayer *movLayers, Layer *layers)
 {
@@ -134,6 +137,45 @@ void mlAdvance(MovLayer *ml, Region *fence)
   } /**< for ml */
 }
 
+/* Moves up the layer for the paddles  */
+void mlUp(MovLayer *ml, Region *fence)
+{
+  Vec2 newPos;
+  u_char axis;
+  Region shapeBoundary;
+  for (; ml; ml = ml->next) {
+    vec2Sub(&newPos, &ml->layer->posNext, &ml->velocity);
+    abShapeGetBounds(ml->layer->abShape, &newPos, &shapeBoundary);
+    for (axis = 0; axis < 2; axis ++) {
+      if ((shapeBoundary.topLeft.axes[axis] < fence->topLeft.axes[axis]) ||
+	  (shapeBoundary.botRight.axes[axis] > fence->botRight.axes[axis]) ) {
+	int velocity = ml->velocity.axes[axis];
+	newPos.axes[axis] += (2*velocity);
+      }	/**< if outside of fence */
+    } /**< for axis */
+    ml->layer->posNext = newPos;
+  } /**< for ml */
+}
+
+/* Moves down the layer for the paddles */
+void mlDown(MovLayer *ml, Region *fence)
+{
+  Vec2 newPos;
+  u_char axis;
+  Region shapeBoundary;
+  for (; ml; ml = ml->next) {
+    vec2Add(&newPos, &ml->layer->posNext, &ml->velocity);
+    abShapeGetBounds(ml->layer->abShape, &newPos, &shapeBoundary);
+    for (axis = 0; axis < 2; axis ++) {
+      if ((shapeBoundary.topLeft.axes[axis] < fence->topLeft.axes[axis]) ||
+	  (shapeBoundary.botRight.axes[axis] > fence->botRight.axes[axis]) ) {
+	int velocity = -ml->velocity.axes[axis];
+	newPos.axes[axis] += (2*velocity);
+      }	/**< if outside of fence */
+    } /**< for axis */
+    ml->layer->posNext = newPos;
+  } /**< for ml */
+}
 
 u_int bgColor = COLOR_BLUE;     /**< The background color */
 int redrawScreen = 1;           /**< Boolean for whether screen needs to be redrawn */
@@ -152,7 +194,7 @@ void main()
   configureClocks();
   lcd_init();
   shapeInit();
-  p2sw_init(1);
+  p2sw_init(15);
 
   shapeInit();
 
@@ -175,6 +217,12 @@ void main()
     P1OUT |= GREEN_LED;       /**< Green led on when CPU on */
     redrawScreen = 0;
     movLayerDraw(&ml0, &layer0);
+    movLayerDraw(&ml1, &layer1);
+    movLayerDraw(&ml2, &layer2);
+    drawString5x7(4,2, "P1: ", COLOR_WHITE, COLOR_BLUE);
+    drawChar5x7(24,2, p1Score, COLOR_WHITE, COLOR_BLUE);
+    drawString5x7(100,2, "P2: ", COLOR_WHITE, COLOR_BLUE);
+    drawChar5x7(120,2, p2Score, COLOR_WHITE, COLOR_BLUE);
   }
 }
 
@@ -184,10 +232,24 @@ void wdt_c_handler()
   static short count = 0;
   P1OUT |= GREEN_LED;		      /**< Green LED on when cpu on */
   count ++;
-  if (count == 15) {
+  u_int switches = p2sw_read();
+  if (count == 10) {
     mlAdvance(&ml0, &fieldFence);
-    if (p2sw_read())
-      redrawScreen = 1;
+
+    /* Check the switches to move the paddles */
+    if (!(switches & (1<<0))){
+      mlUp(&ml1, &fieldFence);
+    }
+    if (!(switches & (1<<1))){
+      mlDown(&ml1, &fieldFence);
+    }
+    if(!(switches & (1<<2))){
+      mlUp(&ml2, &fieldFence);
+    }
+    if(!(switches & (1<<3))){
+      mlDown(&ml2, &fieldFence);
+    }
+    redrawScreen = 1;
     count = 0;
   } 
   P1OUT &= ~GREEN_LED;		    /**< Green LED off when cpu off */
