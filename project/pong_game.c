@@ -1,7 +1,5 @@
 /** \file pong_game.c
- *  \brief This is a pong game implementation.
- *  Two layers containing the two paddles for the two players.
- *  Another layer contains the ball.
+ *  \brief Implementation of the game Pong for the MSP430.
  */
 
 #include <msp430.h>
@@ -11,6 +9,7 @@
 #include <p2switches.h>
 #include <shape.h>
 #include <abCircle.h>
+#include "buzzer.h"
 
 #define GREEN_LED BIT6
 
@@ -113,7 +112,7 @@ void movLayerDraw(MovLayer *movLayers, Layer *layers)
 
 //Region fence = {{10,30}, {SHORT_EDGE_PIXELS-10, LONG_EDGE_PIXELS-10}}; /**< Create a fence region */
 
-/** Advances a moving shape within a fence
+/** Advances a moving shape (Ball) within a fence
  *  
  *  \param ml The moving shape to be advanced
  *  \param fence The region which will serve as a boundary for ml
@@ -131,6 +130,17 @@ void mlAdvance(MovLayer *ml, Region *fence)
 	  (shapeBoundary.botRight.axes[axis] > fence->botRight.axes[axis]) ) {
 	int velocity = ml->velocity.axes[axis] = -ml->velocity.axes[axis];
 	newPos.axes[axis] += (2*velocity);
+
+	p1Score++;
+	p2Score++;
+	buzzer_play_sound();
+	
+	if(p1Score == '5' || p2Score == '5'){
+	  p1Score = '0';
+	  p2Score = '0';
+	}
+	drawChar5x7(24,2, p1Score, COLOR_WHITE, COLOR_BLUE);
+	drawChar5x7(120,2, p2Score, COLOR_WHITE, COLOR_WHITE);
       }	/**< if outside of fence */
     } /**< for axis */
     ml->layer->posNext = newPos;
@@ -195,6 +205,7 @@ void main()
   lcd_init();
   shapeInit();
   p2sw_init(15);
+  buzzer_init();
 
   shapeInit();
 

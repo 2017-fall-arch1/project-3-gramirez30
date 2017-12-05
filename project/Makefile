@@ -10,7 +10,7 @@ AS              = msp430-elf-gcc -mmcu=${CPU} -c
 all:pong_game.elf
 
 #additional rules for files
-pong_game.elf: ${COMMON_OBJECTS} pong_game.o wdt_handler.o
+pong_game.elf: ${COMMON_OBJECTS} pong_game.o buzzer.o wdt_handler.o
 	${CC} ${CFLAGS} ${LDFLAGS} -o $@ $^ -lTimer -lLcd -lShape -lCircle -lp2sw
 
 load: pong_game.elf
