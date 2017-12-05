@@ -133,14 +133,18 @@ void mlAdvance(MovLayer *ml, Region *fence)
 
 	p1Score++;
 	p2Score++;
-	buzzer_play_sound();
-	
-	if(p1Score == '5' || p2Score == '5'){
-	  p1Score = '0';
-	  p2Score = '0';
-	}
 	drawChar5x7(24,2, p1Score, COLOR_WHITE, COLOR_BLUE);
 	drawChar5x7(120,2, p2Score, COLOR_WHITE, COLOR_WHITE);
+	
+	player_scored = 1;
+	
+	if(p1Score == '5' || p2Score == '5'){
+	  game_over = 1;
+	  p1Score = '0';
+	  p2Score = '0';
+	  drawChar5x7(24,2, p1Score, COLOR_WHITE, COLOR_BLUE);
+	  drawChar5x7(120,2, p2Score, COLOR_WHITE, COLOR_WHITE);
+	}
       }	/**< if outside of fence */
     } /**< for axis */
     ml->layer->posNext = newPos;
@@ -244,6 +248,9 @@ void wdt_c_handler()
   P1OUT |= GREEN_LED;		      /**< Green LED on when cpu on */
   count ++;
   u_int switches = p2sw_read();
+
+  buzzer_play_sound();
+  
   if (count == 10) {
     mlAdvance(&ml0, &fieldFence);
 

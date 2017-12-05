@@ -10,6 +10,9 @@
 //short sound3[] = {880,784,880,698,880,659,880,587,880,523,880,587};
 //short sound4[] = {932,0,932,932,1046,1046,932,880,784,698,0,698,784,698,784};
 
+int player_scored = 0;
+int game_over = 0;
+
 void buzzer_init()
 {
     /* 
@@ -37,10 +40,20 @@ void buzzer_play_sound(){
 
   static int sound_counter = 0; // Sound counter to play the sound
 
-  while(sound_counter < 30000){
-    buzzer_set_period(5000);
-    sound_counter++;
+  if(sound_counter == 20){
+    buzzer_set_period(0);
+    player_scored = 0;
+    game_over = 0;
+    sound_counter = 0;
   }
-  buzzer_set_period(0);
-  sound_counter = 0;
+  else{
+    if(game_over){
+      buzzer_set_period(1000);
+    }
+    else if(player_scored){
+      buzzer_set_period(7000);
+    }
+  }
+
+  sound_counter++;
 }
