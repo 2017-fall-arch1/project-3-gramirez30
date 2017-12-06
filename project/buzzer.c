@@ -2,14 +2,6 @@
 #include "libTimer.h"
 #include "buzzer.h"
 
-//char selected_sound; // Song to be played
-
-/* Diferent sounds for each switch on the Green board */
-//short sound1[] = {659,622,659,622,659,494,587,523,440};
-//short sound2[] = {988,1046,1174,1174,1046,988,880,784,784,880,988,988,880};
-//short sound3[] = {880,784,880,698,880,659,880,587,880,523,880,587};
-//short sound4[] = {932,0,932,932,1046,1046,932,880,784,698,0,698,784,698,784};
-
 int player_scored = 0;
 int game_over = 0;
 
@@ -39,8 +31,8 @@ void buzzer_set_period(short cycles)
 void buzzer_play_sound(){
 
   static int sound_counter = 0; // Sound counter to play the sound
-
-  if(sound_counter == 20){
+  
+  if(sound_counter == 30){
     buzzer_set_period(0);
     player_scored = 0;
     game_over = 0;
@@ -48,10 +40,10 @@ void buzzer_play_sound(){
   }
   else{
     if(game_over){
-      buzzer_set_period(1000);
+      buzzer_set_period(7000);
     }
     else if(player_scored){
-      buzzer_set_period(7000);
+      buzzer_set_period(500);
     }
   }
 

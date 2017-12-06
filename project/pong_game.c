@@ -130,27 +130,30 @@ void mlAdvance(MovLayer *ml, Region *fence)
 	  (shapeBoundary.botRight.axes[axis] > fence->botRight.axes[axis]) ) {
 	int velocity = ml->velocity.axes[axis] = -ml->velocity.axes[axis];
 	newPos.axes[axis] += (2*velocity);
-
-	p1Score++;
+	
+      }
+      else if(shapeBoundary.topLeft.axes[0] < fence->topLeft.axes[0]){
 	p2Score++;
-	drawChar5x7(24,2, p1Score, COLOR_WHITE, COLOR_BLUE);
-	drawChar5x7(120,2, p2Score, COLOR_WHITE, COLOR_WHITE);
-	
+	drawChar5x7(120,2, p2Score, COLOR_WHITE, COLOR_BLUE);
 	player_scored = 1;
-	
-	if(p1Score == '5' || p2Score == '5'){
-	  game_over = 1;
-	  p1Score = '0';
-	  p2Score = '0';
-	  drawChar5x7(24,2, p1Score, COLOR_WHITE, COLOR_BLUE);
-	  drawChar5x7(120,2, p2Score, COLOR_WHITE, COLOR_WHITE);
-	}
-      }	/**< if outside of fence */
+      }
+      else if(shapeBoundary.botRight.axes[0] > fence->botRight.axes[0]){
+	p1Score++;
+	drawChar5x7(24,2, p1Score, COLOR_WHITE, COLOR_BLUE);
+	player_scored = 1;
+      }/**< if outside of fence */
+
+      if(p1Score == '5' || p2Score == '5'){
+	game_over = 1;
+	p1Score = '0';
+	p2Score = '0';
+	drawChar5x7(24,2, p1Score, COLOR_WHITE, COLOR_BLUE);
+	drawChar5x7(120,2, p2Score, COLOR_WHITE, COLOR_BLUE);
+      }
     } /**< for axis */
     ml->layer->posNext = newPos;
   } /**< for ml */
 }
-
 /* Moves up the layer for the paddles  */
 void mlUp(MovLayer *ml, Region *fence)
 {
