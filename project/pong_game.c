@@ -127,7 +127,9 @@ void mlAdvance(MovLayer *ml, Region *fence)
     abShapeGetBounds(ml->layer->abShape, &newPos, &shapeBoundary);
     for (axis = 0; axis < 2; axis ++) {
       if ((shapeBoundary.topLeft.axes[axis] < fence->topLeft.axes[axis]) ||
-	  (shapeBoundary.botRight.axes[axis] > fence->botRight.axes[axis]) ) {
+	  (shapeBoundary.botRight.axes[axis] > fence->botRight.axes[axis]) ||
+	  (abShapeCheck(ml1.layer->abShape, &ml1.layer->posNext, &newPos)) ||
+	  (abShapeCheck(ml2.layer->abShape, &ml2.layer->posNext, &newPos)) ) {
 	int velocity = ml->velocity.axes[axis] = -ml->velocity.axes[axis];
 	newPos.axes[axis] += (2*velocity);
 	
@@ -136,11 +138,15 @@ void mlAdvance(MovLayer *ml, Region *fence)
 	p2Score++;
 	drawChar5x7(120,2, p2Score, COLOR_WHITE, COLOR_BLUE);
 	player_scored = 1;
+	newPos.axes[0] = screenWidth/2;
+	newPos.axes[1] = screenHeight/2;
       }
       else if(shapeBoundary.botRight.axes[0] > fence->botRight.axes[0]){
 	p1Score++;
 	drawChar5x7(24,2, p1Score, COLOR_WHITE, COLOR_BLUE);
 	player_scored = 1;
+	newPos.axes[0] = screenWidth/2;
+	newPos.axes[1] = screenHeight/2;
       }/**< if outside of fence */
 
       if(p1Score == '5' || p2Score == '5'){
